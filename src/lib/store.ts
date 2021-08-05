@@ -57,7 +57,7 @@ export function parseNoteFromFile(path: string): Note {
   // Notes are stored as plain .txt files, with the first line always being the title.
   const fileInfo = statSync(path)
   const fileName = basename(path)
-  const lastModified = fileInfo.mtime.getDate()
+  const lastModified = fileInfo.mtime.getTime()
   const fileContents = readFileSync(path, 'utf-8')
   const title = fileContents.split('\n')[0]
   const content = fileContents.slice(title.length + 1)
@@ -73,7 +73,7 @@ export function parseLinkFromFile(path: string): Link {
   // Links are also plain text but the entire file is just the url.
   const fileInfo = statSync(path)
   const fileName = basename(path)
-  const lastModified = fileInfo.mtime.getDate()
+  const lastModified = fileInfo.mtime.getTime()
   const url = readFileSync(path, 'utf-8')
   return { id: fileName, url, lastModified }
 }
@@ -83,7 +83,7 @@ export function parseImageFromFile(path: string): Image {
   // then read and sent back as a base64 URL.
   const fileInfo = statSync(path)
   const fileName = basename(path)
-  const lastModified = fileInfo.mtime.getDate()
+  const lastModified = fileInfo.mtime.getTime()
   const src = readFileSync(path, 'base64')
   return {
     id: fileName,
@@ -96,7 +96,7 @@ export function parseDirectory(path: string): Directory {
   const dirInfo = statSync(path)
 
   const id = basename(path)
-  const lastModified = dirInfo.mtime.getDate()
+  const lastModified = dirInfo.mtime.getTime()
 
   const name = readFileSync(join(path, 'name'), 'utf8')
 
