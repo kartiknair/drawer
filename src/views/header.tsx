@@ -1,5 +1,10 @@
+/** @jsxImportSource @emotion/react */
+
+import { css } from '@emotion/react'
 import { useRouter } from 'next/router'
 import { useCallback, useRef } from 'react'
+
+import Button from '../components/button'
 
 export default function Header({
   revalidate,
@@ -24,7 +29,7 @@ export default function Header({
         const reader = new FileReader()
         reader.readAsDataURL(file)
         reader.addEventListener('load', async () => {
-          await fetch(`/api/new/image${dir && `?dir=${dir}`}`, {
+          await fetch(`/api/new/image${dir ? `?dir=${dir}` : ''}`, {
             method: 'POST',
             body: reader.result,
           })
@@ -37,7 +42,12 @@ export default function Header({
   }, [])
 
   return (
-    <header>
+    <header
+      css={css`
+        display: flex;
+        margin-bottom: 5rem;
+      `}
+    >
       <input
         type='file'
         accept='image/*'
@@ -45,21 +55,27 @@ export default function Header({
         style={{ display: 'none' }}
       />
 
-      <button
+      <Button
+        css={css`
+          margin-left: auto;
+        `}
         onClick={async () => {
-          await fetch(`/api/new/note${dir && `?dir=${dir}`}`, {
+          await fetch(`/api/new/note${dir ? `?dir=${dir}` : ''}`, {
             method: 'POST',
-            body: 'Woah, a new note!',
+            body: 'Untitled',
           })
           revalidate()
         }}
       >
         + Note
-      </button>
+      </Button>
 
-      <button
+      <Button
+        css={css`
+          margin-left: 1rem;
+        `}
         onClick={async () => {
-          await fetch(`/api/new/link${dir && `?dir=${dir}`}`, {
+          await fetch(`/api/new/link${dir ? `?dir=${dir}` : ''}`, {
             method: 'POST',
             body: 'https://example.com',
           })
@@ -67,26 +83,32 @@ export default function Header({
         }}
       >
         + Link
-      </button>
+      </Button>
 
-      <button
+      <Button
+        css={css`
+          margin-left: 1rem;
+        `}
         onClick={() => {
           if (fileInput.current === null) return
           fileInput.current.click()
         }}
       >
         + Image
-      </button>
+      </Button>
 
       {router.pathname === '/' && (
-        <button
+        <Button
+          css={css`
+            margin-left: 1rem;
+          `}
           onClick={async () => {
             await fetch('/api/new/dir?name=Untitled')
             revalidate()
           }}
         >
           + Directory
-        </button>
+        </Button>
       )}
     </header>
   )

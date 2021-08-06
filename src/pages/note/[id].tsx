@@ -55,7 +55,7 @@ export default function NoteEditor() {
       debouncedTitle !== null &&
       (note.content !== debouncedContent || note.title !== debouncedTitle)
     ) {
-      fetch(`/api/new/note?id=${id}${dirid && `&dir=${dirid}`}`, {
+      fetch(`/api/new/note?id=${id}${dirid ? `&dir=${dirid}` : ''}`, {
         method: 'POST',
         body: debouncedTitle + '\n' + debouncedContent,
       }).then(() => {
@@ -74,7 +74,7 @@ export default function NoteEditor() {
   }
 
   return (
-    <div>
+    <>
       <input
         type='text'
         value={title}
@@ -86,6 +86,6 @@ export default function NoteEditor() {
           setContent(e.target.value)
         }}
       ></textarea>
-    </div>
+    </>
   )
 }

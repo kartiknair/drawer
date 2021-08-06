@@ -73,6 +73,7 @@ export default (req: NextApiRequest, res: NextApiResponse<Success | Error>) => {
     let existingId = req.query.id
     if (Array.isArray(existingId)) existingId = existingId.join('')
 
+    console.log(existingId)
     const newId = existingId || nanoid()
     let newFilesPath = ''
     let encoding: BufferEncoding = 'utf8'

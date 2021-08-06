@@ -21,10 +21,10 @@ export default function DirectoryEditor() {
 
   if (error) {
     return (
-      <main>
+      <>
         <h2>Oh no! We've had an error:</h2>
         <pre>{error}</pre>
-      </main>
+      </>
     )
   } else if (!store) {
     return <p>Loading...</p>
@@ -33,7 +33,7 @@ export default function DirectoryEditor() {
   }
 
   return (
-    <main>
+    <>
       <Header revalidate={revalidate} />
       <EditableItems
         notes={dir.notes}
@@ -41,6 +41,6 @@ export default function DirectoryEditor() {
         images={dir.images}
         revalidate={revalidate}
       />
-    </main>
+    </>
   )
 }

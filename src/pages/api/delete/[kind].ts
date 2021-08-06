@@ -49,7 +49,14 @@ export default (req: NextApiRequest, res: NextApiResponse<Response>) => {
   if (kind === 'dir') {
     path = join(rootDir, 'directories', id)
   } else {
-    path = join(rootDir, kind + 's', id)
+    let dir = req.query.dir
+    if (Array.isArray(dir)) dir = dir.join('')
+
+    path = dir
+      ? join(rootDir, 'directories', dir, kind + 's', id)
+      : join(rootDir, kind + 's', id)
+
+    console.log(path)
   }
 
   try {
