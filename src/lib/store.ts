@@ -4,9 +4,9 @@ import {
   readdirSync,
   ensureDirSync,
   statSync,
-  Dir,
   writeFileSync,
 } from 'fs-extra'
+import { pathToFileURL } from 'url'
 import { nanoid } from 'nanoid'
 
 export type ID = string
@@ -84,10 +84,11 @@ export function parseImageFromFile(path: string): Image {
   const fileInfo = statSync(path)
   const fileName = basename(path)
   const lastModified = fileInfo.mtime.getTime()
-  const src = readFileSync(path, 'base64')
+
+  const src = `http://localhost:8080/images/${fileName}`
   return {
     id: fileName,
-    src: 'data:' + extname(path).slice(1) + ';base64,' + src,
+    src,
     lastModified,
   }
 }

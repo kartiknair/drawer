@@ -1,10 +1,10 @@
 import type { Store, Note } from '../../lib/store'
 
 import { useState, useEffect } from 'react'
-import useSWR, { mutate } from 'swr'
 import { useRouter } from 'next/dist/client/router'
 
-import { useDebounce } from '../../lib/use-debounce'
+import useFetch from '../../lib/use-fetch'
+import useDebounce from '../../lib/use-debounce'
 
 const fetcher = (path: string) => fetch(path).then((res) => res.json())
 
@@ -12,7 +12,7 @@ export default function NoteEditor() {
   const router = useRouter()
   const id = router.query.id
 
-  const { data: store, error } = useSWR<Store>('/api/store', fetcher)
+  const { data: store, error, revalidate } = useFetch<Store>('/api/store')
   const [note, setNote] = useState<Note>({
     id: '',
     content: '',
@@ -51,7 +51,7 @@ export default function NoteEditor() {
         body: debouncedTitle + '\n' + debouncedContent,
       }).then(() => {
         console.log('auto saved')
-        mutate('/api/store')
+        revalidate()
       })
     }
   }, [debouncedTitle, debouncedContent])

@@ -1,13 +1,18 @@
 import type { Store, Link as Link } from '../lib/store'
 
 import NextLink from 'next/link'
-import useSWR, { mutate } from 'swr'
-import { useRef, useState, useEffect } from 'react'
+import { useCallback, useRef, useState, useEffect } from 'react'
 import * as Popover from '@radix-ui/react-popover'
 
-const fetcher = (path: string) => fetch(path).then((res) => res.json())
+import useFetch from '../lib/use-fetch'
 
-function EditableLink({ link }: { link: Link }) {
+function EditableLink({
+  link,
+  revalidate,
+}: {
+  link: Link
+  revalidate: () => Promise<void>
+}) {
   const closeButtonRef = useRef<HTMLButtonElement>(null)
   const [newUrl, setNewUrl] = useState('')
 
@@ -16,6 +21,14 @@ function EditableLink({ link }: { link: Link }) {
       <a target='_blank' href={link.url}>
         {link.url}
       </a>
+      <button
+        onClick={async () => {
+          await fetch(`/api/delete/link?id=${link.id}`)
+          revalidate()
+        }}
+      >
+        Delete
+      </button>
       <Popover.Root>
         <Popover.Trigger>Edit</Popover.Trigger>
         <Popover.Content>
@@ -33,7 +46,7 @@ function EditableLink({ link }: { link: Link }) {
                 body: newUrl,
               })
 
-              await mutate('/api/store')
+              revalidate()
             }}
           >
             <input
@@ -50,37 +63,34 @@ function EditableLink({ link }: { link: Link }) {
 }
 
 export default function Home() {
-  const fileInput = useRef<HTMLInputElement>(null)
-  const { data: store, error } = useSWR<Store>('/api/store', { fetcher })
+  const fileInput = useRef<HTMLInputElement | null>(null)
+  const { data: store, error, revalidate } = useFetch<Store>('/api/store')
 
-  useEffect(() => {
-    const changeListener = (e: Event) => {
-      if (!e.target) return
-      let fileTarget = e.target as HTMLInputElement
-      if (!fileTarget.files) return
+  const fileInputRef = useCallback((node) => {
+    if (node !== null) {
+      node.addEventListener('change', (e: Event) => {
+        if (!e.target) return
+        let fileTarget = e.target as HTMLInputElement
+        if (!fileTarget.files) return
 
-      let file = fileTarget.files[0]
-      if (!file) return
+        let file = fileTarget.files[0]
+        if (!file) return
 
-      const reader = new FileReader()
-      reader.readAsDataURL(file)
-      reader.addEventListener('load', async () => {
-        const res = await fetch('/api/new/image', {
-          method: 'POST',
-          body: reader.result,
+        const reader = new FileReader()
+        reader.readAsDataURL(file)
+        reader.addEventListener('load', async () => {
+          const res = await fetch('/api/new/image', {
+            method: 'POST',
+            body: reader.result,
+          })
+          const json = await res.json()
+          revalidate()
         })
-        const json = await res.json()
-        await mutate('/api/store')
-        console.log('Created image: ', json)
       })
-    }
 
-    fileInput.current?.addEventListener('change', changeListener)
-
-    return () => {
-      fileInput.current?.removeEventListener('change', changeListener)
+      fileInput.current = node
     }
-  }, [fileInput])
+  }, []) // adjust deps
 
   if (error) {
     return (
@@ -99,7 +109,7 @@ export default function Home() {
         <input
           type='file'
           accept='image/*'
-          ref={fileInput}
+          ref={fileInputRef}
           style={{ display: 'none' }}
         />
 
@@ -110,8 +120,7 @@ export default function Home() {
               body: 'Woah, a new note!',
             })
             const json = await res.json()
-            await mutate('/api/store')
-            console.log(json)
+            revalidate()
           }}
         >
           + Note
@@ -124,8 +133,7 @@ export default function Home() {
               body: 'https://example.com',
             })
             const json = await res.json()
-            await mutate('/api/store')
-            console.log(json)
+            revalidate()
           }}
         >
           + Link
@@ -146,6 +154,15 @@ export default function Home() {
         <div key={note.id}>
           <h4>{note.title}</h4>
           <p>{note.content.slice(35)}</p>
+          <button
+            onClick={async () => {
+              const res = await fetch(`/api/delete/note?id=${note.id}`)
+              const json = await res.json()
+              revalidate()
+            }}
+          >
+            Delete
+          </button>
           <NextLink href={`/note/${note.id}`}>
             <a>Edit</a>
           </NextLink>
@@ -154,12 +171,22 @@ export default function Home() {
 
       <h3>Links</h3>
       {store.links.map((link) => (
-        <EditableLink link={link} key={link.id} />
+        <EditableLink link={link} key={link.id} revalidate={revalidate} />
       ))}
 
       <h3>Images</h3>
       {store.images.map((image) => (
-        <img style={{ maxWidth: '400px' }} src={image.src} key={image.id} />
+        <div>
+          <img style={{ maxWidth: '400px' }} src={image.src} key={image.id} />
+          <button
+            onClick={async () => {
+              await fetch(`/api/delete/image?id=${image.id}`)
+              revalidate()
+            }}
+          >
+            Delete
+          </button>
+        </div>
       ))}
     </main>
   )
