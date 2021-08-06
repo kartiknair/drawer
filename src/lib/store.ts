@@ -154,14 +154,14 @@ export function ensureStore(path: string) {
 
 export function createDirectory(name: string, rootDir: string): string {
   const dirId = nanoid()
-  const dirPath = join(rootDir, dirId)
+  const dirPath = join(rootDir, 'directories', dirId)
 
   ensureDirSync(dirPath)
   ensureDirSync(join(dirPath, 'notes'))
   ensureDirSync(join(dirPath, 'links'))
   ensureDirSync(join(dirPath, 'images'))
 
-  writeFileSync(join(rootDir, dirId, 'name'), name)
+  writeFileSync(join(rootDir, 'directories', dirId, 'name'), name)
 
   return dirId
 }

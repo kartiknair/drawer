@@ -6,8 +6,6 @@ import { useRouter } from 'next/dist/client/router'
 import useFetch from '../../lib/use-fetch'
 import useDebounce from '../../lib/use-debounce'
 
-const fetcher = (path: string) => fetch(path).then((res) => res.json())
-
 export default function NoteEditor() {
   const router = useRouter()
   const id = router.query.id
@@ -19,6 +17,7 @@ export default function NoteEditor() {
     title: '',
     lastModified: 0,
   })
+  const [dirid, setDirid] = useState<string>('')
 
   const [title, setTitle] = useState<string | null>(null)
   const [content, setContent] = useState<string | null>(null)
@@ -29,7 +28,17 @@ export default function NoteEditor() {
   useEffect(() => {
     if (!store) return
 
-    const foundNote = store.notes.find((n) => n.id === id)
+    let foundNote = store.notes.find((n) => n.id === id)
+
+    if (!foundNote) {
+      for (let dir of store.directories) {
+        foundNote = dir.notes.find((n) => n.id === id)
+        if (foundNote) {
+          setDirid(dir.id)
+          break
+        }
+      }
+    }
 
     if (foundNote) {
       setNote(foundNote)
@@ -46,7 +55,7 @@ export default function NoteEditor() {
       debouncedTitle !== null &&
       (note.content !== debouncedContent || note.title !== debouncedTitle)
     ) {
-      fetch(`/api/new/note?id=${id}`, {
+      fetch(`/api/new/note?id=${id}${dirid && `&dir=${dirid}`}`, {
         method: 'POST',
         body: debouncedTitle + '\n' + debouncedContent,
       }).then(() => {
