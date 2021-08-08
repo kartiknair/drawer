@@ -148,23 +148,27 @@ export default function NoteEditor() {
     }
   }, [debouncedTitle, debouncedContent])
 
-  if (error) {
-    return <pre>{JSON.stringify(error)}</pre>
-  } else if (!store) {
-    return <p>Loading...</p>
-  } else if (content === null || title === null) {
-    return <p>404, a note with that id was not found</p>
-  }
-
   return (
     <>
-      <Header revalidate={revalidate} />
-      <Editor
-        title={title}
-        setTitle={setTitle}
-        content={content}
-        setContent={setContent}
-      />
+      <Header revalidate={revalidate} dirid={dirid} />
+
+      {error ? (
+        <>
+          <h2>Oh no! We've had an error:</h2>
+          <pre>{JSON.stringify(error)}</pre>
+        </>
+      ) : !store ? (
+        <p>Loading...</p>
+      ) : content === null || title === null ? (
+        <p>404, a note with that id was not found</p>
+      ) : (
+        <Editor
+          title={title}
+          setTitle={setTitle}
+          content={content}
+          setContent={setContent}
+        />
+      )}
     </>
   )
 }

@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
-import { css } from '@emotion/react'
 import Link from 'next/link'
+import { css } from '@emotion/react'
 import { useRouter } from 'next/router'
 import { useCallback, useRef, useState, useEffect } from 'react'
 
@@ -9,16 +9,18 @@ import Button from '../components/button'
 
 export default function Header({
   revalidate,
+  dirid,
 }: {
   revalidate: () => Promise<void>
+  dirid: string | undefined
 }) {
   const router = useRouter()
   const [dirname, setDirname] = useState('')
 
   useEffect(() => {
-    if (router.query.dirid) {
+    if (dirid) {
       ;(async () => {
-        const res = await fetch(`/api/dirname/${router.query.dirid}`)
+        const res = await fetch(`/api/dirname/${dirid}`)
         const json = await res.json()
         if (res.status === 200) {
           setDirname(json.name)
@@ -27,7 +29,7 @@ export default function Header({
         }
       })()
     }
-  }, [router])
+  }, [dirid])
 
   const fileInput = useRef<HTMLInputElement | null>(null)
 
@@ -44,15 +46,10 @@ export default function Header({
         const reader = new FileReader()
         reader.readAsDataURL(file)
         reader.addEventListener('load', async () => {
-          await fetch(
-            `/api/new/image${
-              router.query.dirid ? `?dir=${router.query.dirid}` : ''
-            }`,
-            {
-              method: 'POST',
-              body: reader.result,
-            }
-          )
+          await fetch(`/api/new/image${dirid ? `?dir=${dirid}` : ''}`, {
+            method: 'POST',
+            body: reader.result,
+          })
           revalidate()
         })
       })
@@ -76,6 +73,7 @@ export default function Header({
 
           a {
             text-decoration: none;
+            color: inherit;
           }
 
           .name {
@@ -86,79 +84,78 @@ export default function Header({
         <Link href='/'>
           <a>~</a>
         </Link>
-        {router.query.dirid && <span className='name'> {dirname}</span>}
+        {dirid && (
+          <Link href={`/dir/${dirid}`}>
+            <a className='name'> {dirname}</a>
+          </Link>
+        )}
       </p>
-      <input
-        type='file'
-        accept='image/*'
-        ref={fileInputRef}
-        style={{ display: 'none' }}
-      />
 
-      <Button
-        css={css`
-          margin-left: auto;
-        `}
-        onClick={async () => {
-          await fetch(
-            `/api/new/note${
-              router.query.dirid ? `?dir=${router.query.dirid}` : ''
-            }`,
-            {
-              method: 'POST',
-              body: 'Untitled',
-            }
-          )
-          revalidate()
-        }}
-      >
-        + Note
-      </Button>
+      {!router.pathname.startsWith('/note') && (
+        <>
+          <input
+            type='file'
+            accept='image/*'
+            ref={fileInputRef}
+            style={{ display: 'none' }}
+          />
 
-      <Button
-        css={css`
-          margin-left: 1rem;
-        `}
-        onClick={async () => {
-          await fetch(
-            `/api/new/link${
-              router.query.dirid ? `?dir=${router.query.dirid}` : ''
-            }`,
-            {
-              method: 'POST',
-              body: 'https://example.com',
-            }
-          )
-          revalidate()
-        }}
-      >
-        + Link
-      </Button>
+          <Button
+            css={css`
+              margin-left: auto;
+            `}
+            onClick={async () => {
+              await fetch(`/api/new/note${dirid ? `?dir=${dirid}` : ''}`, {
+                method: 'POST',
+                body: 'Untitled',
+              })
+              revalidate()
+            }}
+          >
+            + Note
+          </Button>
 
-      <Button
-        css={css`
-          margin-left: 1rem;
-        `}
-        onClick={() => {
-          if (fileInput.current === null) return
-          fileInput.current.click()
-        }}
-      >
-        + Image
-      </Button>
+          <Button
+            css={css`
+              margin-left: 1rem;
+            `}
+            onClick={async () => {
+              await fetch(`/api/new/link${dirid ? `?dir=${dirid}` : ''}`, {
+                method: 'POST',
+                body: 'https://example.com',
+              })
+              revalidate()
+            }}
+          >
+            + Link
+          </Button>
 
-      {router.pathname === '/' && (
-        <Button
-          css={css`
-            margin-left: 1rem;
-          `}
-          onClick={async () => {
-            await fetch('/api/new/dir?name=Untitled')
-            revalidate()
-          }}
-        >
-          + Directory
-        </Button>
+          <Button
+            css={css`
+              margin-left: 1rem;
+            `}
+            onClick={() => {
+              if (fileInput.current === null) return
+              fileInput.current.click()
+            }}
+          >
+            + Image
+          </Button>
+
+          {router.pathname === '/' && (
+            <Button
+              css={css`
+                margin-left: 1rem;
+              `}
+              onClick={async () => {
+                await fetch('/api/new/dir?name=Untitled')
+                revalidate()
+              }}
+            >
+              + Directory
+            </Button>
+          )}
+        </>
       )}
     </header>
   )

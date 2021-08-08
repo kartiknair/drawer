@@ -19,28 +19,33 @@ export default function DirectoryEditor() {
       setDir(store.directories.find((dir) => dir.id === router.query.dirid))
   }, [store])
 
-  if (error) {
-    return (
-      <>
-        <h2>Oh no! We've had an error:</h2>
-        <pre>{error}</pre>
-      </>
-    )
-  } else if (!store) {
-    return <p>Loading...</p>
-  } else if (!dir) {
-    return <p>A directory with that ID doesn't exist.</p>
-  }
-
   return (
     <>
-      <Header revalidate={revalidate} />
-      <EditableItems
-        notes={dir.notes}
-        links={dir.links}
-        images={dir.images}
+      <Header
         revalidate={revalidate}
+        dirid={
+          Array.isArray(router.query.dirid)
+            ? router.query.dirid.join('')
+            : router.query.dirid
+        }
       />
+      {error ? (
+        <>
+          <h2>Oh no! We've had an error:</h2>
+          <pre>{JSON.stringify(error)}</pre>
+        </>
+      ) : !store ? (
+        <p>Loading...</p>
+      ) : !dir ? (
+        <p>A directory with that ID doesn't exist.</p>
+      ) : (
+        <EditableItems
+          notes={dir.notes}
+          links={dir.links}
+          images={dir.images}
+          revalidate={revalidate}
+        />
+      )}
     </>
   )
 }
