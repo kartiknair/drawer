@@ -1,8 +1,9 @@
 /** @jsxImportSource @emotion/react */
 
 import { css } from '@emotion/react'
+import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState, useEffect } from 'react'
 
 import Button from '../components/button'
 
@@ -12,7 +13,21 @@ export default function Header({
   revalidate: () => Promise<void>
 }) {
   const router = useRouter()
-  let dir = router.query.dirid || ''
+  const [dirname, setDirname] = useState('')
+
+  useEffect(() => {
+    if (router.query.dirid) {
+      ;(async () => {
+        const res = await fetch(`/api/dirname/${router.query.dirid}`)
+        const json = await res.json()
+        if (res.status === 200) {
+          setDirname(json.name)
+        } else {
+          setDirname('Error')
+        }
+      })()
+    }
+  }, [router])
 
   const fileInput = useRef<HTMLInputElement | null>(null)
 
@@ -29,10 +44,15 @@ export default function Header({
         const reader = new FileReader()
         reader.readAsDataURL(file)
         reader.addEventListener('load', async () => {
-          await fetch(`/api/new/image${dir ? `?dir=${dir}` : ''}`, {
-            method: 'POST',
-            body: reader.result,
-          })
+          await fetch(
+            `/api/new/image${
+              router.query.dirid ? `?dir=${router.query.dirid}` : ''
+            }`,
+            {
+              method: 'POST',
+              body: reader.result,
+            }
+          )
           revalidate()
         })
       })
@@ -48,6 +68,26 @@ export default function Header({
         margin-bottom: 5rem;
       `}
     >
+      <p
+        css={css`
+          font-family: var(--font-mono);
+          color: var(--grey-3);
+          font-size: 1rem;
+
+          a {
+            text-decoration: none;
+          }
+
+          .name {
+            font-size: 0.9rem;
+          }
+        `}
+      >
+        <Link href='/'>
+          <a>~</a>
+        </Link>
+        {router.query.dirid && <span className='name'> {dirname}</span>}
+      </p>
       <input
         type='file'
         accept='image/*'
@@ -60,10 +100,15 @@ export default function Header({
           margin-left: auto;
         `}
         onClick={async () => {
-          await fetch(`/api/new/note${dir ? `?dir=${dir}` : ''}`, {
-            method: 'POST',
-            body: 'Untitled',
-          })
+          await fetch(
+            `/api/new/note${
+              router.query.dirid ? `?dir=${router.query.dirid}` : ''
+            }`,
+            {
+              method: 'POST',
+              body: 'Untitled',
+            }
+          )
           revalidate()
         }}
       >
@@ -75,10 +120,15 @@ export default function Header({
           margin-left: 1rem;
         `}
         onClick={async () => {
-          await fetch(`/api/new/link${dir ? `?dir=${dir}` : ''}`, {
-            method: 'POST',
-            body: 'https://example.com',
-          })
+          await fetch(
+            `/api/new/link${
+              router.query.dirid ? `?dir=${router.query.dirid}` : ''
+            }`,
+            {
+              method: 'POST',
+              body: 'https://example.com',
+            }
+          )
           revalidate()
         }}
       >
