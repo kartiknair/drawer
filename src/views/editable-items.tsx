@@ -152,7 +152,7 @@ export default function EditableItems({
 
   useEffect(() => {
     let newItems = [...notes, ...links, ...images]
-    setItems(newItems.sort((a, b) => a.lastModified - b.lastModified))
+    setItems(newItems.sort((a, b) => b.lastModified - a.lastModified))
   }, [notes, links, images])
 
   const dirid = router.query.dirid
