@@ -17,6 +17,9 @@ function MyApp({ Component, pageProps }: AppProps) {
             --grey-3: #888888;
             --grey-4: #333333;
             --grey-5: #111111;
+
+            --font-sans: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
           }
 
           *,
@@ -34,7 +37,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           body {
             background: var(--grey-1);
             color: var(--grey-3);
-            font-family: 'Inter', sans-serif;
+            font-family: var(--font-sans);
           }
 
           h1,
@@ -49,6 +52,19 @@ function MyApp({ Component, pageProps }: AppProps) {
 
           .mono {
             font-family: 'IBM Plex Mono', monospace;
+          }
+
+          // Proesemirror
+          .ProseMirror-focused {
+            outline: none;
+          }
+          .ProseMirror .is-editor-empty:first-of-type::before {
+            content: attr(data-placeholder);
+            float: left;
+            color: inherit;
+            opacity: 0.5;
+            pointer-events: none;
+            height: 0;
           }
         `}
       />
