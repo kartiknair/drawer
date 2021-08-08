@@ -55,8 +55,6 @@ export default (req: NextApiRequest, res: NextApiResponse<Response>) => {
     path = dir
       ? join(rootDir, 'directories', dir, kind + 's', id)
       : join(rootDir, kind + 's', id)
-
-    console.log(path)
   }
 
   try {

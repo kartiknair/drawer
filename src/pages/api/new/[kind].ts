@@ -73,7 +73,6 @@ export default (req: NextApiRequest, res: NextApiResponse<Success | Error>) => {
     let existingId = req.query.id
     if (Array.isArray(existingId)) existingId = existingId.join('')
 
-    console.log(existingId)
     const newId = existingId || nanoid()
     let newFilesPath = ''
     let encoding: BufferEncoding = 'utf8'
@@ -102,7 +101,6 @@ export default (req: NextApiRequest, res: NextApiResponse<Success | Error>) => {
       newFilesPath = !dir
         ? join(rootDir, 'images', newId + `.${ext}`)
         : join(rootDir, 'directories', dir, 'images', newId + `.${ext}`)
-      console.log('image path:', newFilesPath)
     }
 
     try {
