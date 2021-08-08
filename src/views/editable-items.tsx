@@ -5,6 +5,7 @@ import type { Note, Link, Image } from '../lib/store'
 import NextLink from 'next/link'
 import { css } from '@emotion/react'
 import { useRouter } from 'next/router'
+import * as Dialog from '@radix-ui/react-dialog'
 import * as Popover from '@radix-ui/react-popover'
 import { useEffect, useState, useRef } from 'react'
 
@@ -190,7 +191,94 @@ export default function EditableItems({
                 overflow: hidden;
                 position: relative;
 
-                button {
+                &:focus-within {
+                  box-shadow: 0 0 0 0.25rem rgba(0, 0, 0, 0.05);
+                }
+
+                &:hover .close-button {
+                  opacity: 1;
+                }
+              `}
+            >
+              <Dialog.Root>
+                <Dialog.Trigger
+                  css={css`
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                    border: none;
+                    padding: none;
+
+                    &:focus {
+                      outline: none;
+                    }
+
+                    img {
+                      height: 100%;
+                    }
+                  `}
+                >
+                  <img src={image.src} />
+                </Dialog.Trigger>
+                <Dialog.Overlay
+                  css={css`
+                    background: rgba(0, 0, 0, 0.1);
+                    backdrop-filter: blur(0.2rem);
+                    position: fixed;
+                    inset: 0;
+                  `}
+                ></Dialog.Overlay>
+                <Dialog.Content
+                  css={css`
+                    border-radius: 0.5rem;
+
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+
+                    img {
+                      height: 80vh;
+                    }
+                  `}
+                >
+                  <img src={image.src} />
+                  <Dialog.Close
+                    css={css`
+                      border: none;
+                      padding: 0;
+
+                      width: 1.5rem;
+                      height: 1.5rem;
+                      border-radius: 0.25rem;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+
+                      position: absolute;
+                      top: 1rem;
+                      right: 1rem;
+                      background: none;
+                      color: var(--grey-3);
+
+                      &:focus {
+                        outline: none;
+                      }
+
+                      &:hover,
+                      &:focus {
+                        background: var(--grey-1);
+                      }
+                    `}
+                  >
+                    <Cross />
+                  </Dialog.Close>
+                </Dialog.Content>
+              </Dialog.Root>
+
+              <button
+                className='close-button'
+                css={css`
                   width: 1.5rem;
                   height: 1.5rem;
                   border-radius: 0.25rem;
@@ -207,20 +295,11 @@ export default function EditableItems({
                   right: 1rem;
                   opacity: 0;
                   transition: all 200ms ease;
-                }
 
-                &:hover button,
-                button:focus {
-                  opacity: 1;
-                }
-
-                img {
-                  height: 100%;
-                }
-              `}
-            >
-              <img style={{ maxWidth: '400px' }} src={image.src} />
-              <button
+                  &:focus {
+                    opacity: 1;
+                  }
+                `}
                 onClick={async () => {
                   await fetch(
                     `/api/delete/image?id=${image.id}${
