@@ -2,8 +2,16 @@ const { createServer } = require('http')
 const { parse } = require('url')
 const next = require('next')
 const { readFile } = require('fs')
+const { resolve } = require('path')
+
+if (process.argv[2] && process.argv[2] === '-production') {
+  process.env['NODE_ENV'] = 'production'
+}
+
+require('dotenv').config({ path: resolve(process.cwd(), '.env.local') })
 
 const dev = process.env.NODE_ENV !== 'production'
+const port = process.env.PORT || 3000
 const app = next({ dev })
 const handle = app.getRequestHandler()
 
@@ -24,8 +32,8 @@ app.prepare().then(() => {
   createServer((req, res) => {
     const parsedUrl = parse(req.url, true)
     handle(req, res, parsedUrl)
-  }).listen(3000, (err) => {
+  }).listen(port, (err) => {
     if (err) throw err
-    console.log('> Ready on http://localhost:3000')
+    console.log(`Ready on http://localhost:${port}`)
   })
 })
