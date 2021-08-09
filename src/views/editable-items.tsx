@@ -4,6 +4,7 @@ import type { Note, Link, Image } from '../lib/store'
 
 import NextLink from 'next/link'
 import { css } from '@emotion/react'
+import useSWR, { mutate } from 'swr'
 import { useRouter } from 'next/router'
 import * as Dialog from '@radix-ui/react-dialog'
 import * as Popover from '@radix-ui/react-popover'
@@ -13,13 +14,7 @@ import { truncate } from '../lib/utils'
 import Input from '../components/input'
 import { Pencil, Cross } from '../components/icons'
 
-function EditableLink({
-  link,
-  revalidate,
-}: {
-  link: Link
-  revalidate: () => Promise<void>
-}) {
+function EditableLink({ link }: { link: Link }) {
   const router = useRouter()
   const dirid = router.query.dirid
 
@@ -54,7 +49,7 @@ function EditableLink({
           await fetch(
             `/api/delete/link?id=${link.id}${dirid ? `&dir=${dirid}` : ''}`
           )
-          revalidate()
+          mutate('/api/store')
         }}
       >
         <Cross />
@@ -120,7 +115,7 @@ function EditableLink({
                   }
                 )
 
-                revalidate()
+                mutate('/api/store')
               }}
             >
               <Input
@@ -141,12 +136,10 @@ export default function EditableItems({
   notes,
   links,
   images,
-  revalidate,
 }: {
   notes: Note[]
   links: Link[]
   images: Image[]
-  revalidate: () => Promise<void>
 }) {
   const router = useRouter()
   const [items, setItems] = useState<(Note | Link | Image)[]>([])
@@ -179,9 +172,7 @@ export default function EditableItems({
       {items.map((item) => {
         if (item.hasOwnProperty('url')) {
           let link = item as Link
-          return (
-            <EditableLink link={link} key={link.id} revalidate={revalidate} />
-          )
+          return <EditableLink link={link} key={link.id} />
         } else if (item.hasOwnProperty('src')) {
           let image = item as Image
           return (
@@ -306,7 +297,7 @@ export default function EditableItems({
                       dirid ? `&dir=${dirid}` : ''
                     }`
                   )
-                  revalidate()
+                  mutate('/api/store')
                 }}
               >
                 <Cross />
@@ -364,7 +355,7 @@ export default function EditableItems({
                     }`
                   )
                   const json = await res.json()
-                  revalidate()
+                  mutate('/api/store')
                 }}
               >
                 <Cross />

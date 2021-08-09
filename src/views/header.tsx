@@ -1,5 +1,5 @@
 /** @jsxImportSource @emotion/react */
-
+import { mutate } from 'swr'
 import Link from 'next/link'
 import { css } from '@emotion/react'
 import { useRouter } from 'next/router'
@@ -9,13 +9,7 @@ import { useCallback, useRef, useState, useEffect } from 'react'
 import Input from '../components/input'
 import Button from '../components/button'
 
-export default function Header({
-  revalidate,
-  dirid,
-}: {
-  revalidate: () => Promise<void>
-  dirid: string | undefined
-}) {
+export default function Header({ dirid }: { dirid: string | undefined }) {
   const router = useRouter()
   const [dirname, setDirname] = useState('')
   const [inputUrl, setInputUrl] = useState('')
@@ -54,7 +48,7 @@ export default function Header({
             method: 'POST',
             body: reader.result,
           })
-          revalidate()
+          mutate('/api/store')
         })
       })
 
@@ -159,7 +153,7 @@ export default function Header({
                     method: 'POST',
                     body: inputUrl,
                   })
-                  revalidate()
+                  mutate('/api/store')
                 }}
               >
                 <Input
@@ -191,7 +185,7 @@ export default function Header({
               `}
               onClick={async () => {
                 await fetch('/api/new/dir?name=Untitled')
-                revalidate()
+                mutate('/api/store')
               }}
             >
               + Directory

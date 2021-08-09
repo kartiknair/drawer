@@ -2,6 +2,7 @@
 
 import type { Store, Note } from '../../lib/store'
 
+import useSWR, { mutate } from 'swr'
 import { css } from '@emotion/react'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
@@ -15,7 +16,6 @@ import { useEditor, EditorContent } from '@tiptap/react'
 import Header from '../../views/header'
 import ConveyError from '../../components/error'
 
-import useFetch from '../../lib/use-fetch'
 import useDebounce from '../../lib/use-debounce'
 
 function convertTextToHTML(text: string): string {
@@ -95,7 +95,7 @@ function Editor({
 export default function NoteEditor() {
   const router = useRouter()
 
-  const { data: store, error, revalidate } = useFetch<Store>('/api/store')
+  const { data: store, error } = useSWR<Store>('/api/store')
   const [note, setNote] = useState<Note>({
     id: '',
     content: '',
@@ -151,14 +151,14 @@ export default function NoteEditor() {
         }
       ).then(() => {
         console.log('auto saved')
-        revalidate()
+        mutate('/api/store')
       })
     }
   }, [note, router.query.noteid, dirid, debouncedTitle, debouncedContent])
 
   return (
     <>
-      <Header revalidate={revalidate} dirid={dirid} />
+      <Header dirid={dirid} />
 
       {error ? (
         <ConveyError error={error} />

@@ -1,9 +1,8 @@
 import type { Directory, Store } from '../../lib/store'
 
+import useSWR from 'swr'
 import { useRouter } from 'next/router'
 import { useState, useEffect } from 'react'
-
-import useFetch from '../../lib/use-fetch'
 
 import Header from '../../views/header'
 import ConveyError from '../../components/error'
@@ -13,17 +12,16 @@ export default function DirectoryEditor() {
   const router = useRouter()
 
   const [dir, setDir] = useState<Directory | null>()
-  const { data: store, error, revalidate } = useFetch<Store>('/api/store')
+  const { data: store, error } = useSWR<Store>('/api/store')
 
   useEffect(() => {
-    if (store !== null)
+    if (store)
       setDir(store.directories.find((dir) => dir.id === router.query.dirid))
   }, [router.query.dirid, store])
 
   return (
     <>
       <Header
-        revalidate={revalidate}
         dirid={
           Array.isArray(router.query.dirid)
             ? router.query.dirid.join('')
@@ -41,7 +39,6 @@ export default function DirectoryEditor() {
           notes={dir.notes}
           links={dir.links}
           images={dir.images}
-          revalidate={revalidate}
         />
       )}
     </>

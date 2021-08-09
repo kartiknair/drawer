@@ -1,8 +1,8 @@
 /** @jsxImportSource @emotion/react */
 import Link from 'next/link'
 import { css } from '@emotion/react'
+import useSWR, { mutate } from 'swr'
 
-import useFetch from '../lib/use-fetch'
 import type { Store } from '../lib/store'
 
 import Header from '../views/header'
@@ -11,11 +11,11 @@ import ConveyError from '../components/error'
 import EditableItems from '../views/editable-items'
 
 export default function Home() {
-  const { data: store, error, revalidate } = useFetch<Store>('/api/store')
+  const { data: store, error } = useSWR<Store>('/api/store')
 
   return (
     <>
-      <Header revalidate={revalidate} dirid={undefined} />
+      <Header dirid={undefined} />
 
       {error ? (
         <ConveyError error={error} />
@@ -84,7 +84,7 @@ export default function Home() {
                 <button
                   onClick={async () => {
                     await fetch(`/api/delete/dir?id=${dir.id}`)
-                    revalidate()
+                    mutate('/api/store')
                   }}
                 >
                   <Cross />
@@ -108,7 +108,6 @@ export default function Home() {
             notes={store.notes}
             links={store.links}
             images={store.images}
-            revalidate={revalidate}
           />
         </>
       )}

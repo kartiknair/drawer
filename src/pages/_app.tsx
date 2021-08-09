@@ -2,6 +2,7 @@
 
 import type { AppProps } from 'next/app'
 
+import { SWRConfig } from 'swr'
 import { Global, css } from '@emotion/react'
 import { IdProvider } from '@radix-ui/react-id'
 
@@ -85,9 +86,15 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       />
       <IdProvider>
-        <Container>
-          <Component {...pageProps} />
-        </Container>
+        <SWRConfig
+          value={{
+            fetcher: (url) => fetch(url).then((res) => res.json()),
+          }}
+        >
+          <Container>
+            <Component {...pageProps} />
+          </Container>
+        </SWRConfig>
       </IdProvider>
     </>
   )
