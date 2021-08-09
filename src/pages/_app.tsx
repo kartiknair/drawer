@@ -3,6 +3,7 @@
 import type { AppProps } from 'next/app'
 
 import { Global, css } from '@emotion/react'
+import { IdProvider } from '@radix-ui/react-id'
 
 import Container from '../components/container'
 
@@ -83,9 +84,11 @@ function MyApp({ Component, pageProps }: AppProps) {
           }
         `}
       />
-      <Container>
-        <Component {...pageProps} />
-      </Container>
+      <IdProvider>
+        <Container>
+          <Component {...pageProps} />
+        </Container>
+      </IdProvider>
     </>
   )
 }
