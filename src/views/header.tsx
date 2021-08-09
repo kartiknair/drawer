@@ -3,8 +3,10 @@
 import Link from 'next/link'
 import { css } from '@emotion/react'
 import { useRouter } from 'next/router'
+import * as Popover from '@radix-ui/react-popover'
 import { useCallback, useRef, useState, useEffect } from 'react'
 
+import Input from '../components/input'
 import Button from '../components/button'
 
 export default function Header({
@@ -16,6 +18,7 @@ export default function Header({
 }) {
   const router = useRouter()
   const [dirname, setDirname] = useState('')
+  const [inputUrl, setInputUrl] = useState('')
 
   useEffect(() => {
     if (dirid) {
@@ -32,6 +35,7 @@ export default function Header({
   }, [dirid])
 
   const fileInput = useRef<HTMLInputElement | null>(null)
+  const urlInputCloseButtonRef = useRef<HTMLButtonElement | null>(null)
 
   const fileInputRef = useCallback((node) => {
     if (node !== null) {
@@ -105,30 +109,68 @@ export default function Header({
               margin-left: auto;
             `}
             onClick={async () => {
-              await fetch(`/api/new/note${dirid ? `?dir=${dirid}` : ''}`, {
-                method: 'POST',
-                body: 'Untitled',
-              })
-              revalidate()
+              const res = await fetch(
+                `/api/new/note${dirid ? `?dir=${dirid}` : ''}`,
+                {
+                  method: 'POST',
+                  body: 'Untitled',
+                }
+              )
+              const json = await res.json()
+              if (res.status === 200) {
+                router.push(`/note/${json.id}`)
+              }
             }}
           >
             + Note
           </Button>
 
-          <Button
-            css={css`
-              margin-left: 1rem;
-            `}
-            onClick={async () => {
-              await fetch(`/api/new/link${dirid ? `?dir=${dirid}` : ''}`, {
-                method: 'POST',
-                body: 'https://example.com',
-              })
-              revalidate()
-            }}
-          >
-            + Link
-          </Button>
+          <Popover.Root>
+            <Popover.Trigger
+              as={Button}
+              css={css`
+                margin-left: 1rem;
+              `}
+            >
+              + Link
+            </Popover.Trigger>
+            <Popover.Content
+              css={css`
+                border-radius: 0.25rem;
+                padding: 0.5rem;
+                background: var(--grey-1);
+                box-shadow: 0px 0.8rem 2rem -0.8rem rgba(0, 0, 0, 0.35),
+                  0px 0.8rem 1.5rem -1rem rgba(0, 0, 0, 0.15);
+              `}
+            >
+              <Popover.Close
+                style={{ display: 'none' }}
+                ref={urlInputCloseButtonRef}
+              />
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault()
+
+                  if (urlInputCloseButtonRef.current !== null) {
+                    urlInputCloseButtonRef.current.click()
+                  }
+
+                  await fetch(`/api/new/link${dirid ? `?dir=${dirid}` : ''}`, {
+                    method: 'POST',
+                    body: inputUrl,
+                  })
+                  revalidate()
+                }}
+              >
+                <Input
+                  type='url'
+                  placeholder='https://example.com'
+                  value={inputUrl}
+                  onChange={(e) => setInputUrl(e.target.value)}
+                />
+              </form>
+            </Popover.Content>
+          </Popover.Root>
 
           <Button
             css={css`
