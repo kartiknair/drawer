@@ -8,7 +8,10 @@ type Response = {
   message: string
 }
 
-export default (req: NextApiRequest, res: NextApiResponse<Response>) => {
+export default function remove(
+  req: NextApiRequest,
+  res: NextApiResponse<Response>
+) {
   if (!process.env.STORAGE_DIRECTORY) {
     res.status(400).json({
       code: 400,

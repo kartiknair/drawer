@@ -15,7 +15,10 @@ type Success = {
   id: string
 }
 
-export default (req: NextApiRequest, res: NextApiResponse<Success | Error>) => {
+export default function create(
+  req: NextApiRequest,
+  res: NextApiResponse<Success | Error>
+) {
   if (!process.env.STORAGE_DIRECTORY) {
     res.status(400).json({
       code: 400,

@@ -20,7 +20,7 @@ export default function useFetch<T>(url: string): {
       .catch((err) => {
         setError(err)
       })
-  }, [])
+  }, [url])
 
   async function revalidate() {
     fetch(url)

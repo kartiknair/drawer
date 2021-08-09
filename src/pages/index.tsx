@@ -7,6 +7,7 @@ import type { Store } from '../lib/store'
 
 import Header from '../views/header'
 import { Cross } from '../components/icons'
+import ConveyError from '../components/error'
 import EditableItems from '../views/editable-items'
 
 export default function Home() {
@@ -17,10 +18,7 @@ export default function Home() {
       <Header revalidate={revalidate} dirid={undefined} />
 
       {error ? (
-        <>
-          <h2>Oh no! We've had an error:</h2>
-          <pre>{error}</pre>
-        </>
+        <ConveyError error={error} />
       ) : !store ? (
         <p>Loading...</p>
       ) : (

@@ -6,6 +6,7 @@ import { useState, useEffect } from 'react'
 import useFetch from '../../lib/use-fetch'
 
 import Header from '../../views/header'
+import ConveyError from '../../components/error'
 import EditableItems from '../../views/editable-items'
 
 export default function DirectoryEditor() {
@@ -17,7 +18,7 @@ export default function DirectoryEditor() {
   useEffect(() => {
     if (store !== null)
       setDir(store.directories.find((dir) => dir.id === router.query.dirid))
-  }, [store])
+  }, [router.query.dirid, store])
 
   return (
     <>
@@ -30,14 +31,11 @@ export default function DirectoryEditor() {
         }
       />
       {error ? (
-        <>
-          <h2>Oh no! We've had an error:</h2>
-          <pre>{JSON.stringify(error)}</pre>
-        </>
+        <ConveyError error={error} />
       ) : !store ? (
         <p>Loading...</p>
       ) : !dir ? (
-        <p>A directory with that ID doesn't exist.</p>
+        <p>A directory with that ID doesn&apos;t exist.</p>
       ) : (
         <EditableItems
           notes={dir.notes}

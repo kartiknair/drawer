@@ -3,10 +3,10 @@ import type { NextApiRequest, NextApiResponse } from 'next'
 
 import { parseStore, ensureStore } from '../../lib/store'
 
-export default (
+export default function getStore(
   _req: NextApiRequest,
   res: NextApiResponse<Store | { code: number; message: string }>
-) => {
+) {
   if (!process.env.STORAGE_DIRECTORY) {
     res.status(400).json({
       code: 400,

@@ -13,6 +13,8 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { useEditor, EditorContent } from '@tiptap/react'
 
 import Header from '../../views/header'
+import ConveyError from '../../components/error'
+
 import useFetch from '../../lib/use-fetch'
 import useDebounce from '../../lib/use-debounce'
 
@@ -92,7 +94,6 @@ function Editor({
 
 export default function NoteEditor() {
   const router = useRouter()
-  const id = router.query.noteid
 
   const { data: store, error, revalidate } = useFetch<Store>('/api/store')
   const [note, setNote] = useState<Note>({
@@ -110,27 +111,29 @@ export default function NoteEditor() {
   const debouncedContent = useDebounce(content, 600)
 
   useEffect(() => {
-    if (!store) return
+    if (content === null || title === null) {
+      if (!store) return
 
-    let foundNote = store.notes.find((n) => n.id === id)
+      let foundNote = store.notes.find((n) => n.id === router.query.noteid)
 
-    if (!foundNote) {
-      for (let dir of store.directories) {
-        foundNote = dir.notes.find((n) => n.id === id)
-        if (foundNote) {
-          setDirid(dir.id)
-          break
+      if (!foundNote) {
+        for (let dir of store.directories) {
+          foundNote = dir.notes.find((n) => n.id === router.query.noteid)
+          if (foundNote) {
+            setDirid(dir.id)
+            break
+          }
         }
       }
-    }
 
-    if (foundNote) {
-      setNote(foundNote)
-      // this only happens when we haven't initialized content/title yet
-      if (content === null) setContent(foundNote.content)
-      if (title === null) setTitle(foundNote.title)
+      if (foundNote) {
+        setNote(foundNote)
+        // this only happens when we haven't initialized content/title yet
+        if (content === null) setContent(foundNote.content)
+        if (title === null) setTitle(foundNote.title)
+      }
     }
-  }, [store])
+  }, [router.query.noteid, store, content, title])
 
   useEffect(() => {
     if (
@@ -138,25 +141,27 @@ export default function NoteEditor() {
       debouncedTitle !== null &&
       (note.content !== debouncedContent || note.title !== debouncedTitle)
     ) {
-      fetch(`/api/new/note?id=${id}${dirid ? `&dir=${dirid}` : ''}`, {
-        method: 'POST',
-        body: debouncedTitle + '\n' + debouncedContent,
-      }).then(() => {
+      fetch(
+        `/api/new/note?id=${router.query.noteid}${
+          dirid ? `&dir=${dirid}` : ''
+        }`,
+        {
+          method: 'POST',
+          body: debouncedTitle + '\n' + debouncedContent,
+        }
+      ).then(() => {
         console.log('auto saved')
         revalidate()
       })
     }
-  }, [debouncedTitle, debouncedContent])
+  }, [note, router.query.noteid, dirid, debouncedTitle, debouncedContent])
 
   return (
     <>
       <Header revalidate={revalidate} dirid={dirid} />
 
       {error ? (
-        <>
-          <h2>Oh no! We've had an error:</h2>
-          <pre>{JSON.stringify(error)}</pre>
-        </>
+        <ConveyError error={error} />
       ) : !store ? (
         <p>Loading...</p>
       ) : content === null || title === null ? (
