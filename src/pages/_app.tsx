@@ -54,6 +54,21 @@ function MyApp({ Component, pageProps }: AppProps) {
             font-family: 'IBM Plex Mono', monospace;
           }
 
+          // Scrollbar
+          body::-webkit-scrollbar {
+            width: 0.5rem;
+          }
+
+          body::-webkit-scrollbar-track {
+            background: var(--grey-1);
+          }
+
+          body::-webkit-scrollbar-thumb {
+            width: 100%;
+            background: var(--grey-2);
+            border-radius: 1rem;
+          }
+
           // Proesemirror
           .ProseMirror-focused {
             outline: none;
