@@ -1,4 +1,3 @@
-// server.js
 const { createServer } = require('http')
 const { parse } = require('url')
 const next = require('next')
@@ -9,6 +8,7 @@ const app = next({ dev })
 const handle = app.getRequestHandler()
 
 app.prepare().then(() => {
+  // This server is used to host the image files from our storage directory
   createServer((req, res) => {
     readFile(process.env.STORAGE_DIRECTORY + req.url, (err, data) => {
       if (err) {
