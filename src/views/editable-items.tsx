@@ -1,5 +1,6 @@
 /** @jsxImportSource @emotion/react */
 
+import type { Metadata } from 'metascraper'
 import type { Note, Link, Image } from '../lib/store'
 
 import NextLink from 'next/link'
@@ -10,16 +11,26 @@ import * as Dialog from '@radix-ui/react-dialog'
 import * as Popover from '@radix-ui/react-popover'
 import { useEffect, useState, useRef } from 'react'
 
-import { truncate } from '../lib/utils'
+import { truncate, truncateWords } from '../lib/utils'
 import Input from '../components/input'
 import { Pencil, Cross } from '../components/icons'
+
+const smallLightGreyItalicText = css`
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--grey-3);
+`
 
 function EditableLink({ link }: { link: Link }) {
   const router = useRouter()
   const dirid = router.query.dirid
 
   const closeButtonRef = useRef<HTMLButtonElement>(null)
+
   const [newUrl, setNewUrl] = useState('')
+  const { data: metadata } = useSWR<Metadata>(
+    `/api/meta?url=${encodeURIComponent(link.url)}`
+  )
 
   return (
     <div
@@ -27,9 +38,17 @@ function EditableLink({ link }: { link: Link }) {
         position: relative;
 
         button {
+          width: 1.5rem;
+          height: 1.5rem;
+          border-radius: 0.25rem;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+
           opacity: 0;
           transition: all 200ms ease;
-          background: none;
+          background: var(--grey-1);
           border: none;
         }
 
@@ -57,8 +76,39 @@ function EditableLink({ link }: { link: Link }) {
 
       <div
         css={css`
+          padding: ${metadata?.image ? '0' : '1.5rem'};
+          height: 12.5rem;
+          overflow: hidden;
+
+          background-image: ${metadata?.image
+            ? `url(${metadata.image})`
+            : 'none'};
+          background-repeat: no-repeat;
+          background-size: auto 12.5rem;
+          background-position: center;
+
+          img {
+            justify-self: center;
+            height: 12.5rem;
+          }
+
+          p {
+            ${smallLightGreyItalicText}
+            margin-top: 0.5rem;
+          }
+        `}
+      >
+        {metadata && !metadata.image && (
+          <>
+            <h4>{metadata.title}</h4>
+            <p className='mono'>{metadata.description}</p>
+          </>
+        )}
+      </div>
+
+      <div
+        css={css`
           height: 2.5rem;
-          margin-top: auto;
           border-top: 1px solid var(--grey-2);
 
           display: flex;
@@ -66,20 +116,20 @@ function EditableLink({ link }: { link: Link }) {
           padding: 0 1rem;
 
           a {
-            font-style: italic;
-            font-size: 0.8rem;
-            color: var(--grey-3);
+            ${smallLightGreyItalicText}
             text-decoration: none;
           }
         `}
       >
         <a className='mono' target='_blank' href={link.url}>
-          {link.url}
+          {truncate(link.url, 25)}
         </a>
         <Popover.Root>
           <Popover.Trigger
             css={css`
-              margin-left: auto;
+              position: absolute;
+              bottom: 0.5rem;
+              right: 0.5rem;
             `}
           >
             <Pencil />
@@ -318,9 +368,7 @@ export default function EditableItems({
                 }
 
                 p {
-                  font-style: italic;
-                  color: var(--grey-3);
-                  font-size: 0.8rem;
+                  ${smallLightGreyItalicText}
                   margin-top: 0.5rem;
                 }
 
@@ -344,7 +392,7 @@ export default function EditableItems({
               <NextLink href={`/note/${note.id}`}>
                 <a>
                   <h4>{note.title}</h4>
-                  <p className='mono'>{truncate(note.content, 35)}</p>
+                  <p className='mono'>{truncateWords(note.content, 35)}</p>
                 </a>
               </NextLink>
               <button
