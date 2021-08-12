@@ -4,7 +4,7 @@ import { join } from 'path'
 import { nanoid } from 'nanoid'
 import { writeFileSync } from 'fs-extra'
 
-import { createDirectory } from '../../../lib/store'
+import { createDirectory, renameDirectory } from '../../../lib/store'
 
 type Error = {
   code: number
@@ -52,21 +52,41 @@ export default function create(
 
   if (kind === 'dir') {
     let name = req.query.name
+    if (Array.isArray(name)) name = name.join('')
 
-    if (!name) name = ''
+    let existingId = req.query.id
+    if (Array.isArray(existingId)) existingId = existingId.join('')
 
-    if (Array.isArray(name)) {
-      name = name.join('')
-    }
-
-    try {
-      const dirid = createDirectory(name, rootDir)
-      res.status(200).json({ id: dirid })
-    } catch (err) {
-      res.status(500).json({
-        code: 500,
-        message: 'Internal error while creating directory: ' + err,
+    if (!existingId && !name) {
+      res.status(400).json({
+        code: 400,
+        message: 'Must provide either name or ID to create/rename directory.',
       })
+    } else if (existingId && !name) {
+      res.status(400).json({
+        code: 400,
+        message: 'Require query parameter name when renaming directory.',
+      })
+    } else if (!existingId && name) {
+      try {
+        const dirid = createDirectory(name, rootDir)
+        res.status(200).json({ id: dirid })
+      } catch (err) {
+        res.status(500).json({
+          code: 500,
+          message: 'Internal error while creating directory: ' + err,
+        })
+      }
+    } else {
+      try {
+        renameDirectory(existingId, name, rootDir)
+        res.status(200).json({ id: existingId })
+      } catch (err) {
+        res.status(500).json({
+          code: 500,
+          message: 'Internal error while renaming directory: ' + err,
+        })
+      }
     }
   } else {
     let dir = req.query.dir

@@ -13,6 +13,7 @@ export default function Header({ dirid }: { dirid: string | undefined }) {
   const router = useRouter()
   const [dirname, setDirname] = useState('')
   const [inputUrl, setInputUrl] = useState('')
+  const [newDirname, setNewDirname] = useState('Untitled')
 
   useEffect(() => {
     if (dirid) {
@@ -30,6 +31,7 @@ export default function Header({ dirid }: { dirid: string | undefined }) {
 
   const fileInput = useRef<HTMLInputElement | null>(null)
   const urlInputCloseButtonRef = useRef<HTMLButtonElement | null>(null)
+  const dirnameInputCloseButtonRef = useRef<HTMLButtonElement | null>(null)
 
   const fileInputRef = useCallback((node) => {
     if (node !== null) {
@@ -179,17 +181,49 @@ export default function Header({ dirid }: { dirid: string | undefined }) {
           </Button>
 
           {router.pathname === '/' && (
-            <Button
-              css={css`
-                margin-left: 1rem;
-              `}
-              onClick={async () => {
-                await fetch('/api/new/dir?name=Untitled')
-                mutate('/api/store')
-              }}
-            >
-              + Directory
-            </Button>
+            <Popover.Root>
+              <Popover.Trigger
+                as={Button}
+                css={css`
+                  margin-left: 1rem;
+                `}
+              >
+                + Directory
+              </Popover.Trigger>
+              <Popover.Content
+                css={css`
+                  border-radius: 0.25rem;
+                  padding: 0.5rem;
+                  background: var(--grey-1);
+                  box-shadow: 0px 0.8rem 2rem -0.8rem rgba(0, 0, 0, 0.35),
+                    0px 0.8rem 1.5rem -1rem rgba(0, 0, 0, 0.15);
+                `}
+              >
+                <Popover.Close
+                  style={{ display: 'none' }}
+                  ref={dirnameInputCloseButtonRef}
+                />
+                <form
+                  onSubmit={async (e) => {
+                    e.preventDefault()
+
+                    if (dirnameInputCloseButtonRef.current !== null) {
+                      dirnameInputCloseButtonRef.current.click()
+                    }
+
+                    await fetch(`/api/new/dir?name=${newDirname}`)
+                    mutate('/api/store')
+                  }}
+                >
+                  <Input
+                    type='text'
+                    placeholder='A name...'
+                    value={newDirname}
+                    onChange={(e) => setNewDirname(e.target.value)}
+                  />
+                </form>
+              </Popover.Content>
+            </Popover.Root>
           )}
         </>
       )}

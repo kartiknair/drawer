@@ -165,3 +165,11 @@ export function createDirectory(name: string, rootDir: string): string {
 
   return dirId
 }
+
+export function renameDirectory(
+  dirId: string,
+  newName: string,
+  rootDir: string
+) {
+  writeFileSync(join(rootDir, 'directories', dirId, 'name'), newName)
+}

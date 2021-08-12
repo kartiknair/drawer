@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
 import type { Metadata } from 'metascraper'
-import type { Note, Link, Image } from '../lib/store'
+import type { Directory, Note, Link, Image } from '../lib/store'
 
 import NextLink from 'next/link'
 import { css } from '@emotion/react'
@@ -392,7 +392,7 @@ export default function EditableItems({
               <NextLink href={`/note/${note.id}`}>
                 <a>
                   <h4>{note.title}</h4>
-                  <p className='mono'>{truncateWords(note.content, 35)}</p>
+                  <p className='mono'>{truncateWords(note.content, 25)}</p>
                 </a>
               </NextLink>
               <button
