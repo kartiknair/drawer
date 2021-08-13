@@ -1,7 +1,7 @@
 /** @jsxImportSource @emotion/react */
 
 import type { Metadata } from 'metascraper'
-import type { Directory, Note, Link, Image } from '../lib/store'
+import type { Note, Link, Image } from '../lib/store'
 
 import NextLink from 'next/link'
 import { css } from '@emotion/react'

@@ -1,9 +1,8 @@
-<center>
-<h3>drawer</h3>
-<p>A self-hosted application to organize your notes, images, & links.</p>
-</center>
+# drawer
 
-![A screenshot of drawer in action](./public/images/screenshot)
+A self-hosted application to organize your notes, images, & links.
+
+![A screenshot of drawer](./public/images/screenshot.png)
 
 ## Getting Started
 
